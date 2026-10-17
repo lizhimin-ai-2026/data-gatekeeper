@@ -1,0 +1,61 @@
+{
+  "schema_version": "1.0",
+  "skill": "data-gatekeeper",
+  "description": "Data Isolation Gatekeeper rule set: whitelist functions / allowed tables / least-privilege / session tokens / audit bridge (computable, single source of truth)",
+  "whitelist_functions": [
+    "read_catalog",
+    "lookup_record"
+  ],
+  "allowed_tables": {
+    "read_catalog": [
+      "public_catalog"
+    ],
+    "lookup_record": [
+      "records",
+      "reference"
+    ]
+  },
+  "allowed_operations": [
+    "SELECT"
+  ],
+  "denied_operations": [
+    "INSERT",
+    "UPDATE",
+    "DELETE",
+    "DROP",
+    "ALTER",
+    "CREATE",
+    "TRUNCATE"
+  ],
+  "min_access_rule": "SELECT-only on allowed tables; any write operation is denied by default (requires an explicit human override)",
+  "token_validation": {
+    "mode": "session",
+    "default_ttl_seconds": 3600,
+    "note": "caller name + session token dual-identification; the token plaintext is returned only once at issue time, the session store keeps only its hash; expired tokens are rejected"
+  },
+  "overrides": {
+    "max_ttl_seconds": 86400,
+    "require_human_final": true,
+    "note": "write/over-table grants require an explicit human decision (human_decision=override + reason), optional TTL, fully auditable"
+  },
+  "audit_bridge": {
+    "enabled": true,
+    "pkg_dir": "",
+    "note": "gatekeeper events are dual-written (local + any 16-column audit sink); set pkg_dir or env AUDIT_PKG_DIR to your audit package; degrades gracefully when unreachable"
+  },
+  "source_identification": {
+    "method": "caller name + session token dual-identification",
+    "implemented_by": "your host application / auth system",
+    "unidentified_action": "deny_CRIT"
+  },
+  "event_contract": {
+    "columns": ["ts", "source", "event_type", "actor", "action", "target", "result", "severity", "rule_id", "evidence_hash", "ref_id", "human_decision", "undo_ref", "note", "status", "schema_version"],
+    "redaction": "sensitive values never logged; only field names and existence; token/param/secret values are never persisted"
+  },
+  "red_lines": {
+    "default_deny": true,
+    "block_only": true,
+    "no_delete": true,
+    "human_final": true
+  }
+}
