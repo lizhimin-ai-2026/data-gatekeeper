@@ -1,3 +1,9 @@
+---
+name: Data Isolation Gatekeeper (data-gatekeeper)
+description: Universal data-access gateway that denies by default — only whitelisted, least-privilege (read-only) functions are allowed; unauthorized or over-privileged access is blocked before any data is returned. Every decision is dual-written to a 16-column audit contract with zero sensitive values on disk; write operations require human final review. Pure Python standard library, zero third-party dependencies, with a cloud-function wrapper and self-test.
+version: 1.0.0
+---
+
 # Data Isolation Gatekeeper (data-gatekeeper)
 
 ## Overview
